@@ -1,0 +1,92 @@
+.tlw-read-gate-overlay {
+	position: fixed;
+	inset: 0;
+	background: rgba(0, 0, 0, 0.72);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	z-index: 999999;
+	opacity: 0;
+	visibility: hidden;
+	transition: opacity 0.2s ease;
+}
+
+.tlw-read-gate-overlay.is-active {
+	opacity: 1;
+	visibility: visible;
+}
+
+.tlw-read-gate-modal {
+	background: #fff;
+	border-radius: 8px;
+	max-width: 480px;
+	width: 90%;
+	padding: 24px;
+	box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+}
+
+.tlw-read-gate-modal h2 {
+	margin-top: 0;
+}
+
+.tlw-read-gate-modal label {
+	display: block;
+	margin-top: 16px;
+	font-weight: 600;
+}
+
+.tlw-read-gate-modal input[type="email"],
+.tlw-read-gate-modal input[type="text"] {
+	width: 100%;
+	padding: 10px;
+	border: 1px solid #ccd0d4;
+	border-radius: 4px;
+	margin-top: 6px;
+}
+
+.tlw-read-gate-consent {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin-top: 16px;
+	font-weight: 400;
+}
+
+.tlw-read-gate-consent a {
+	margin-left: 4px;
+}
+
+.tlw-read-gate-submit {
+	margin-top: 16px;
+	width: 100%;
+	padding: 12px 16px;
+	background: #111;
+	color: #fff;
+	border: none;
+	border-radius: 4px;
+	cursor: pointer;
+	font-size: 16px;
+}
+
+.tlw-read-gate-helper {
+	margin-top: 12px;
+	font-size: 13px;
+	color: #555;
+}
+
+.tlw-read-gate-error {
+	color: #b32d2e;
+	min-height: 20px;
+}
+
+.tlw-read-gate-honeypot {
+	position: absolute;
+	left: -9999px;
+	height: 0;
+	width: 0;
+	overflow: hidden;
+}
+
+body.tlw-read-gate-lock {
+	overflow: hidden;
+}
