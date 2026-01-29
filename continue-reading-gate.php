@@ -18,12 +18,14 @@ final class TLW_Continue_Reading_Gate {
 	const COOKIE_UNLOCKED_NAME = 'tlw_read_gate_unlocked';
 	const COOKIE_ATTEMPT_NAME  = 'tlw_gate_attempt_id';
 	const COOKIE_VISITOR_NAME  = 'tlw_gate_vid';
+	const CAPABILITY           = 'tlw_read_gate_manage';
 
 	public static function init() {
 		add_action( 'init', array( __CLASS__, 'maybe_upgrade' ) );
 		add_action( 'admin_init', array( __CLASS__, 'register_settings' ) );
 		add_action( 'admin_menu', array( __CLASS__, 'register_menu' ) );
 		add_action( 'admin_notices', array( __CLASS__, 'admin_https_notice' ) );
+		add_filter( 'map_meta_cap', array( __CLASS__, 'map_capabilities' ), 10, 4 );
 		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'enqueue_assets' ) );
 		add_action( 'wp_footer', array( __CLASS__, 'render_modal' ) );
 		add_action( 'wp_ajax_tlw_gate_token', array( __CLASS__, 'ajax_gate_token' ) );
@@ -187,7 +189,7 @@ final class TLW_Continue_Reading_Gate {
 		add_options_page(
 			__( 'Continue Reading Gate', 'tlw' ),
 			__( 'Continue Reading Gate', 'tlw' ),
-			'manage_options',
+			self::CAPABILITY,
 			'tlw-read-gate',
 			array( __CLASS__, 'render_settings_page' )
 		);
@@ -196,14 +198,14 @@ final class TLW_Continue_Reading_Gate {
 			'tlw-read-gate',
 			__( 'Gate Leads', 'tlw' ),
 			__( 'Gate Leads', 'tlw' ),
-			'manage_options',
+			self::CAPABILITY,
 			'tlw-read-gate-leads',
 			array( __CLASS__, 'render_leads_page' )
 		);
 	}
 
 	public static function render_settings_page() {
-		if ( ! current_user_can( 'manage_options' ) ) {
+		if ( ! current_user_can( self::CAPABILITY ) ) {
 			return;
 		}
 		?>
@@ -221,7 +223,7 @@ final class TLW_Continue_Reading_Gate {
 	}
 
 	public static function admin_https_notice() {
-		if ( ! current_user_can( 'manage_options' ) ) {
+		if ( ! current_user_can( self::CAPABILITY ) ) {
 			return;
 		}
 		if ( ! wp_is_using_https() ) {
@@ -230,7 +232,7 @@ final class TLW_Continue_Reading_Gate {
 	}
 
 	public static function render_leads_page() {
-		if ( ! current_user_can( 'manage_options' ) ) {
+		if ( ! current_user_can( self::CAPABILITY ) ) {
 			return;
 		}
 
@@ -347,7 +349,7 @@ final class TLW_Continue_Reading_Gate {
 	}
 
 	private static function export_csv() {
-		if ( ! current_user_can( 'manage_options' ) ) {
+		if ( ! current_user_can( self::CAPABILITY ) ) {
 			wp_die( esc_html__( 'Unauthorized', 'tlw' ) );
 		}
 
@@ -446,7 +448,7 @@ final class TLW_Continue_Reading_Gate {
 	}
 
 	private static function is_preview_mode() {
-		return current_user_can( 'manage_options' ) && isset( $_GET['tlw_gate_preview'] ) && '1' === $_GET['tlw_gate_preview'];
+		return current_user_can( self::CAPABILITY ) && isset( $_GET['tlw_gate_preview'] ) && '1' === $_GET['tlw_gate_preview'];
 	}
 
 	private static function is_eligible() {
@@ -457,7 +459,7 @@ final class TLW_Continue_Reading_Gate {
 		if ( self::has_unlocked_cookie() ) {
 			return false;
 		}
-		if ( current_user_can( 'manage_options' ) && ! self::is_preview_mode() ) {
+		if ( current_user_can( self::CAPABILITY ) && ! self::is_preview_mode() ) {
 			return false;
 		}
 		if ( is_admin() || is_preview() || post_password_required() || self::is_login_screen() ) {
@@ -737,6 +739,16 @@ final class TLW_Continue_Reading_Gate {
 	private static function mark_duplicate( $email ) {
 		$key = 'tlw_gate_dup_' . md5( strtolower( $email ) );
 		set_transient( $key, 1, HOUR_IN_SECONDS );
+	}
+
+	public static function map_capabilities( $caps, $cap, $user_id, $args ) {
+		if ( self::CAPABILITY !== $cap ) {
+			return $caps;
+		}
+		if ( user_can( $user_id, 'manage_options' ) || user_can( $user_id, 'manage_network_options' ) ) {
+			return array( 'exist' );
+		}
+		return array( 'do_not_allow' );
 	}
 }
 
