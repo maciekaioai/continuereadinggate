@@ -457,7 +457,7 @@ final class TLW_Continue_Reading_Gate {
 		if ( self::has_unlocked_cookie() ) {
 			return false;
 		}
-		if ( current_user_can( 'manage_options' ) ) {
+		if ( current_user_can( 'manage_options' ) && ! self::is_preview_mode() ) {
 			return false;
 		}
 		if ( is_admin() || is_preview() || post_password_required() || self::is_login_screen() ) {
